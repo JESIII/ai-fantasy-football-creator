@@ -1,93 +1,94 @@
 AI Fantasy Football Creator
+==========================
 
-This project contains a DraftKings Classic NFL lineup generator prototype.
+A small DraftKings Classic NFL lineup generator prototype.
 
-Features
-- Mock data source (for development and testing)
-- Optimizer that generates lineups respecting DraftKings Classic roster rules and salary cap
-- CLI to generate lineups
-- Unit test for the optimizer
+What this repo provides
+- An integer-programming-based optimizer (PuLP) that builds DraftKings Classic lineups.
+- Parsers for FFToolbox CSVs and a small web fallback.
+- A CLI and a minimal Tkinter GUI for selecting a CSV and generating lineups.
+- A unit test for the optimizer (pytest).
 
-How to run (Windows PowerShell)
+Quick setup (Windows PowerShell)
 
-1. Create a venv and activate it
-
-```powershell
-python -m venv .venv
-AI Fantasy Football Creator
-
-This project contains a DraftKings Classic NFL lineup generator prototype.
-
-Features
-- Mock data source (for development and testing)
-- Optimizer that generates lineups respecting DraftKings Classic roster rules and salary cap
-- CLI to generate lineups
-- Unit test for the optimizer
-
-Setup (Windows PowerShell)
-
-1. Create a virtual environment and install dependencies
+1) Create and activate a virtual environment
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+2) Install dependencies
+
+```powershell
 pip install -r requirements.txt
 ```
 
-Using the FFToolbox CSV (recommended)
+Data source (FFT oolbox CSV)
 
-1. Download the DraftKings CSV from FFToolbox (the site provides a CSV downloader). Example page:
+This tool expects a DraftKings salary/projection CSV exported from FFToolbox (or a similar source). Example FFToolbox page:
 
-	https://fftoolbox.fulltimefantasy.com/football/draftkings-fulltimefantasy-scores.php?dgi=134308
+https://fftoolbox.fulltimefantasy.com/football/draftkings-fulltimefantasy-scores.php
 
-2. Run the CLI and either let the tool open a file picker or pass the CSV path directly.
+The parser looks for common headers such as: Contest, Pos, Team, Name, Salary, Game Info, Proj.
 
-	- Let the CLI open a file picker (recommended):
+CLI usage
 
-	```powershell
-	python -m src.cli --source fftoolbox --count 5
-	# The CLI will print the FFToolbox link and open a file chooser for the CSV you downloaded.
-	```
+- Generate 3 lineups by selecting the FFToolbox CSV via a file picker:
 
-	- Or pass the CSV path directly:
+```powershell
+python -m src.cli --source fftoolbox --count 3
+```
 
-	```powershell
-	python -m src.cli --source fftoolbox --salary-url "C:\path\to\Draftkings Salary and FullTime Score as of 09-25-2025.csv" --count 5
-	```
-
-Notes about the CSV
-- The expected CSV columns (the parser looks for these) are: Contest, Pos, Team, Name, Salary, Game Info, Proj, FullTime Score
-- Example rows:
-
-  Contest,Pos,Team,Name,Salary,Game Info,Proj,FullTime Score
-  Main Slate,RB,SF,Christian McCaffrey,8500,JAX@SF 4:05 PM ET,26.8,3.15
-  Main Slate,RB,ATL,Bijan Robinson,8200,WAS@ATL 1:00 PM ET,22.7,2.77
-
-CLI options
-- --source: data source (mock, web, fftoolbox)
-- --count: how many lineups to generate
-- --salary-url: optional CSV path or URL for salary/projection data
-- --data-url: optional URL for web sources
-
-Examples
-
-- Generate 3 lineups from the provided local FFToolbox CSV:
+- Or pass a local CSV path directly:
 
 ```powershell
 python -m src.cli --source fftoolbox --salary-url "g:\Repos\ai-fantasy-football-creator\data\Draftkings Salary and FullTime Score as of 09-25-2025.csv" --count 3
 ```
 
+- Common CLI options:
+	- --count N (how many lineups)
+	- --overlap-max N (max shared players with previous lineups)
+	- --team-max N (max teammates from same NFL team)
+	- --stack-penalty N (soft penalty for QB without same-team WR)
+	- --preset <default|heavy_stacking|contrarian|cash>
+	- --gui (launch the GUI)
+
+Run the GUI
+
+Start the Tkinter GUI:
+
+```powershell
+python -m src.gui
+```
+
+The GUI lets you browse to a downloaded FFToolbox CSV, tweak options (count, overlap, team max, stacking), generate lineups, and export results to a text file. There's also a "Download FFToolbox" button that opens the FFToolbox page in your browser.
+
+Troubleshooting
+
+- If you see "No module named tkinter", reinstall Python from python.org and ensure Tcl/Tk support is installed.
+- If the CSV fails to parse, open it in Excel or a text editor and verify headers include Name, Pos, Team, Salary, Proj and is UTF-8 encoded.
+
+License / Disclaimer
+
+Use responsibly. Respect third-party site terms of service when using exported data.
 Troubleshooting
 - If the CLI can't find or parse the CSV, verify the CSV has the required headers and is UTF-8 encoded.
 - If tkinter file picker doesn't open on your system, pass the CSV path using `--salary-url`.
 
-Warnings
-- This is a prototype. For production, integrate an official data feed and add error handling, rate limiting, and logging.
-- Respect the terms of service of any website or data provider; prefer official APIs or paid data providers.
+Run the GUI (one-click)
+-----------------------
 
-Next steps (suggestions)
-- Add overlap/variance constraints to the optimizer to produce diversified lineups
-- Export lineups in DraftKings upload-friendly CSV format
-- Add a small GUI for one-click CSV select + lineup generation
+If you prefer a simple graphical interface, a small Tkinter GUI is included. From the project root run:
 
-If you'd like, I can implement any of the next steps above—tell me which one to prioritize.
+```powershell
+python -m src.gui
+```
+
+What the GUI does:
+- Lets you browse to the FFToolbox CSV you downloaded (or click "Download FFToolbox" to open the page in your browser).
+- Provides fields for count, overlap, team max, stack penalty and presets.
+- Click "Generate" to produce lineups and "Export" to save them to a text file.
+
+GUI troubleshooting
+- If the GUI fails to start with "No module named tkinter", reinstall Python from python.org and ensure Tcl/Tk support is included.
