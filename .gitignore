@@ -1,0 +1,5 @@
+.venv/
+.pytest_cache/
+# ignore data exports / user-downloaded CSVs
+data/
+sample_data/
